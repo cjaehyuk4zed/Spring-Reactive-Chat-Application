@@ -1,4 +1,4 @@
-Readme 생성
+# Chat Application using Spring Reactive and MongoDB
 
 
 ## Messenger Chat : 
@@ -16,6 +16,7 @@ Capped Collection을 사용해야, MongoDB의 *Tailable Cursor* 를 통해서
 - Java Spring
 - Spring Reactive
 - Spring WebFlux
+- Spring Security (OAuth2 Client)
 
 ### 백엔드 구조
 Spring Reactive의 *Flux* 데이터 타입을 통해서 연속적인 data stream을 송신한다.

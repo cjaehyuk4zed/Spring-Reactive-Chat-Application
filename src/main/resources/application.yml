@@ -12,3 +12,11 @@ spring:
       host: localhost
       port: 27017
       database: chatdb
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          allofhealth_platform:
+#            client-id: 76716d91-5c8d-44a9-93c6-ca7cd3a1d0f4
+#            client-name: messenger
+#            client-secret:
