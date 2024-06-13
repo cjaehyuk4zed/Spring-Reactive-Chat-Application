@@ -12,6 +12,8 @@ spring:
       host: localhost
       port: 27017
       database: chatdb
+  config:
+    additional-location : ../../../config/global/
 #  security:
 #    oauth2:
 #      client:

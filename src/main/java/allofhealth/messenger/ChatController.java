@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestController // 데이터 리턴 서버
+@RestController(value = "/api/v1/chat") // 데이터 리턴 서버
 public class ChatController {
 
     private final ChatRepository chatRepository;
@@ -37,7 +37,7 @@ public class ChatController {
     }
 
     @CrossOrigin
-    @GetMapping(value = "/chat/roomNum/{roomNum}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/roomNum/{roomNum}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Chat> findByRoomNum(@PathVariable Long roomNum) {
         return chatRepository.mFindByRoomNum(roomNum)
                 .subscribeOn(Schedulers.boundedElastic());
