@@ -11,7 +11,12 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class MessengerReactiveUserDetailsService implements ReactiveUserDetailsService {
 
-    private UserAuthRepository userAuthRepository;
+    /**
+     * Note that a ReactiveSecurityContextRepository is not needed, as we are using JWT tokens that are stateless.
+     * This means the SecurityContext is constructed on each HTTP request.
+     */
+
+    private final UserAuthRepository userAuthRepository;
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {

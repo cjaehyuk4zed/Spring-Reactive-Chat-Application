@@ -1,18 +1,16 @@
 package allofhealth.messenger.auth;
 
-import allofhealth.messenger.constants.AuthHeaderConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -57,29 +55,50 @@ public class JwtAuthenticationFilter implements WebFilter {
         userId = jwtService.extractUsername(accessToken);
         log.info("JwtFilter : JWT token received, userId = " + userId);
 
-        // Validate the JWT token
-        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            // userDetails will hold an instance of User_Auth (DB table entity which implements the UserDetails interface)
-            UserDetails userDetails = (UserDetails) this.userDetailsService.findByUsername(userId);
-            log.info("JwtFilter ONE : Got UserDetalis");
+//        // Validate the JWT token
+//        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null){
+//            // userDetails will hold an instance of User_Auth (DB table entity which implements the UserDetails interface)
+//            UserDetails userDetails = (UserDetails) this.userDetailsService.findByUsername(userId);
+//            log.info("JwtFilter ONE : Got UserDetalis");
+//
+//            // If JWT token is valid, configure Spring Security to set auth
+//            if(jwtService.isTokenValid(accessToken, clientIp, userDetails)){
+//                // Potentially add credentials later???
+//                log.info("JwtFilter TWO : Validated JWT Token");
+//                log.info("JwtFilter : Authorities are " + userDetails.getAuthorities());
+//                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken( userId, null, userDetails.getAuthorities());
+//                authToken.setDetails(exchange.getRequest());
+//                // Note that `ReactiveSecurityContextHolder` still uses the `SecurityContext` class
+//                // Creates an empty SecurityContext if none exists and set the auth
+//                ReactiveSecurityContextHolder.withAuthentication(authToken);
+//                log.info("JwtFilter : SecurityContext is : " + ReactiveSecurityContextHolder.getContext());
+//            }
+//
+//        }
+//
+//        log.info("JwtFilter : Auth Header existed, but did not pass the filters");
+//        return loginRedirect(exchange);
 
-            // If JWT token is valid, configure Spring Security to set auth
-            if(jwtService.isTokenValid(accessToken, clientIp, userDetails)){
-                // Potentially add credentials later???
-                log.info("JwtFilter TWO : Validated JWT Token");
-                log.info("JwtFilter : Authorities are " + userDetails.getAuthorities());
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken( userId, null, userDetails.getAuthorities());
-                authToken.setDetails(exchange.getRequest());
-                // Note that `ReactiveSecurityContextHolder` still uses the `SecurityContext` class
-                // Creates an empty SecurityContext if none exists and set the auth
-                ReactiveSecurityContextHolder.withAuthentication(authToken);
-                log.info("JwtFilter : SecurityContext is : " + ReactiveSecurityContextHolder.getContext());
-            }
+        return this.userDetailsService.findByUsername(userId)
+                .flatMap(userDetails -> {
+                    log.info("JwtFilter ONE : Got UserDetails");
 
-        }
+                    if (jwtService.isTokenValid(accessToken, clientIp, userDetails)) {
+                        log.info("JwtFilter TWO : Validated JWT Token");
+                        log.info("JwtFilter : Authorities are " + userDetails.getAuthorities());
 
-        log.info("JwtFilter : Auth Header existed, but did not pass the filters");
-        return loginRedirect(exchange);
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                userId, null, userDetails.getAuthorities());
+                        authToken.setDetails(exchange.getRequest());
+
+                        SecurityContext context = new SecurityContextImpl(authToken);
+                        return chain.filter(exchange)
+                                .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
+                    } else {
+                        return loginRedirect(exchange);
+                    }
+                }).switchIfEmpty(loginRedirect(exchange));
+
     }
 
     private Mono<Void> loginRedirect(ServerWebExchange exchange){

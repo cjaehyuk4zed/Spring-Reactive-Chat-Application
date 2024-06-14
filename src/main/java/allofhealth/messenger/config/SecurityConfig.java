@@ -1,53 +1,39 @@
 package allofhealth.messenger.config;
 
-import allofhealth.messenger.auth.MessengerReactiveUserDetailsService;
-import allofhealth.messenger.auth.UserAuthRepository;
-import allofhealth.messenger.constants.DirectoryMapConstants;
+import allofhealth.messenger.auth.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.userdetails.*;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationEntryPoint;
 
+import static allofhealth.messenger.constants.AuthHeaderConstants.*;
 import static allofhealth.messenger.constants.DirectoryMapConstants.*;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableWebFluxSecurity
 public class SecurityConfig {
 
-    /**
-     * Note that a ReactiveSecurityContextRepository is not needed, as we are using JWT tokens that are stateless
-     * This means the SecurityContext is constructed on each HTTP request
-     */
-
-    private final UserAuthRepository userAuthRepository;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ReactiveAuthenticationManager authenticationManager;
 
     @Bean
-    public ReactiveUserDetailsService userDetailsService(){
-        return new MessengerReactiveUserDetailsService();
-    }
-
-    /**
-     * Note that Reactive Spring Security DOES NOT have authentication providers
-     * (unlike the non-reactive Spring Security which has an `AuthenticationManager` and a `AuthenticationProvider` class)
-     * Instead, the `ReactiveAuthenticationManager` directly implements the authentication logic
-     * @return
-     */
-    @Bean
-    public ReactiveAuthenticationManager authenticationManager(){
-        UserDetailsRepositoryReactiveAuthenticationManager authenticationManager =
-                new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService());
-        return authenticationManager;
-    }
-
-    @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http){
-        http.csrf((csrf) -> csrf.disable())
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+        ServerHttpSecurity serverHttpSecurity = http.csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers(CHAT_CONTROLLER)).
+                        .pathMatchers(CHAT_CONTROLLER).authenticated()
+                        .pathMatchers("/api/**").authenticated()
+                        .anyExchange().denyAll())
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.authenticationEntryPoint(new RedirectServerAuthenticationEntryPoint(LOGIN_REDIRECT_URI)))
+                .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .authenticationManager(authenticationManager);
 
+        return serverHttpSecurity.build();
     }
 }
