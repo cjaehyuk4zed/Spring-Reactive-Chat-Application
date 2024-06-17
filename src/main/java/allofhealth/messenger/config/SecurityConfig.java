@@ -24,7 +24,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        ServerHttpSecurity serverHttpSecurity = http.csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers(CHAT_CONTROLLER).authenticated()
                         .pathMatchers("/api/**").authenticated()
@@ -34,6 +34,6 @@ public class SecurityConfig {
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .authenticationManager(authenticationManager);
 
-        return serverHttpSecurity.build();
+        return http.build();
     }
 }

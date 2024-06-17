@@ -1,5 +1,6 @@
-package allofhealth.messenger;
+package allofhealth.messenger.config;
 
+import allofhealth.messenger.chat.Chat;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
@@ -9,6 +10,11 @@ import org.springframework.data.mongodb.core.CollectionOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 import reactor.core.publisher.Mono;
+
+/**
+ * MongoDB Configuration
+ * Configures a "capped collection" database on MongoDB, needed for using the @Tailable annotation
+ */
 
 @Configuration
 @EnableReactiveMongoRepositories(basePackages = "allofhealth.messenger")

@@ -35,9 +35,13 @@ public class JwtAuthenticationFilter implements WebFilter {
      * @param exchange the current server exchange
      * @param chain    provides a way to delegate to the next filter
      * @return {@code Mono<Void>} to indicate when request processing is complete
+     *
+     * the `Void` class is an uninstantiable placeholder class to hold a reference to the `Class` object
+     * representing the Java keyword void.
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        log.info("Begin JWTFilter _____________________________________________");
 
         final String accessToken;
         final String userId;
@@ -55,53 +59,53 @@ public class JwtAuthenticationFilter implements WebFilter {
         userId = jwtService.extractUsername(accessToken);
         log.info("JwtFilter : JWT token received, userId = " + userId);
 
-//        // Validate the JWT token
-//        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null){
-//            // userDetails will hold an instance of User_Auth (DB table entity which implements the UserDetails interface)
-//            UserDetails userDetails = (UserDetails) this.userDetailsService.findByUsername(userId);
-//            log.info("JwtFilter ONE : Got UserDetalis");
+//        return this.userDetailsService.findByUsername(userId)
+//                .flatMap(userDetails -> {
+//                    log.info("JWTFilter : flatMap initiated");
+//                    if (jwtService.isTokenValid(accessToken, clientIp, userDetails)) {
 //
-//            // If JWT token is valid, configure Spring Security to set auth
-//            if(jwtService.isTokenValid(accessToken, clientIp, userDetails)){
-//                // Potentially add credentials later???
-//                log.info("JwtFilter TWO : Validated JWT Token");
-//                log.info("JwtFilter : Authorities are " + userDetails.getAuthorities());
-//                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken( userId, null, userDetails.getAuthorities());
-//                authToken.setDetails(exchange.getRequest());
-//                // Note that `ReactiveSecurityContextHolder` still uses the `SecurityContext` class
-//                // Creates an empty SecurityContext if none exists and set the auth
-//                ReactiveSecurityContextHolder.withAuthentication(authToken);
-//                log.info("JwtFilter : SecurityContext is : " + ReactiveSecurityContextHolder.getContext());
-//            }
-//
-//        }
-//
-//        log.info("JwtFilter : Auth Header existed, but did not pass the filters");
-//        return loginRedirect(exchange);
+//                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+//                                userId, null, userDetails.getAuthorities());
+//                        authToken.setDetails(exchange.getRequest());
+//                        log.info("JWT authToken : {}", authToken);
+////                // Note that `ReactiveSecurityContextHolder` still uses the `SecurityContext` class
+//                        SecurityContext context = new SecurityContextImpl(authToken);
+//                        return chain.filter(exchange)
+//                                .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
+//                    } else {
+//                        return loginRedirect(exchange);
+//                    }
+//                }).switchIfEmpty(loginRedirect(exchange));
 
-        return this.userDetailsService.findByUsername(userId)
+        Mono<UserDetails> userDetailsMono = this.userDetailsService.findByUsername(userId);
+
+        return userDetailsMono
                 .flatMap(userDetails -> {
-                    log.info("JwtFilter ONE : Got UserDetails");
-
+                    log.info("JWTFilter : flatMap initiated");
+                    log.info("JWTFilter : flatMap userDetails : {} | {} | {}", userDetails, userDetails.getUsername(), userDetails.getPassword());
                     if (jwtService.isTokenValid(accessToken, clientIp, userDetails)) {
-                        log.info("JwtFilter TWO : Validated JWT Token");
-                        log.info("JwtFilter : Authorities are " + userDetails.getAuthorities());
 
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userId, null, userDetails.getAuthorities());
                         authToken.setDetails(exchange.getRequest());
-
+                        log.info("JWT authToken : {}", authToken);
+//                // Note that `ReactiveSecurityContextHolder` still uses the `SecurityContext` class
                         SecurityContext context = new SecurityContextImpl(authToken);
+                        log.info("JWT Filter : Completed userDetailsMono flatMap");
+                        log.info("userDetailsMono : {}", userDetailsMono);
+                        log.info("userDetailsMono contents : {}", userDetailsMono.toString());
                         return chain.filter(exchange)
                                 .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
                     } else {
+                        log.info("JWT Filter : else statement initiated");
+                        log.info("else userDetailsMono : {}", userDetailsMono);
                         return loginRedirect(exchange);
                     }
                 }).switchIfEmpty(loginRedirect(exchange));
-
     }
 
     private Mono<Void> loginRedirect(ServerWebExchange exchange){
+        log.info("JWTFilter : loginRedirect loginRedirect");
         String redirectUri = UriComponentsBuilder.fromUriString(LOGIN_REDIRECT_URI)
                 .queryParam("redirect", exchange.getRequest().getURI())
                 .build().toString();
