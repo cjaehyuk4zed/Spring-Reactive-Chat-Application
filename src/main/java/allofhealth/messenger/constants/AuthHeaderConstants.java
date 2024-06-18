@@ -12,5 +12,5 @@ public class AuthHeaderConstants {
     //HTTP Bearer Authentication - Originally for OAuth2, but is widely used for JWT as well
     public static final String BEARER = "Bearer";
 
-    public static final String LOGIN_REDIRECT_URI = PLATFORM_SERVER_IP + AUTH_CONTROLLER + "/login";
+    public static final String LOGIN_REDIRECT_URI = PLATFORM_SERVER_SOCKET_ADDR + AUTH_CONTROLLER + "/login";
 }

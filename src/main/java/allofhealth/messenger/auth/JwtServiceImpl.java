@@ -101,11 +101,12 @@ public class JwtServiceImpl implements JwtService{
     @Override
     public boolean isTokenValid(String token, String clientIp, UserDetails userDetails){
         final String username = extractUsername(token);
-        log.info("Username : " + userDetails.getUsername());
-        log.info("Subject : " + extractClaim(token, Claims::getAudience));
-        log.info("Issuer : " + extractClaim(token, Claims::getIssuer));
-        return (username.equals(userDetails.getUsername())) && extractClaim(token, Claims::getAudience).equals(clientIp)
-                && extractClaim(token, Claims::getIssuer).equals(PLATFORM_SERVER_IP) && !isTokenExpired(token);
+        log.info("JwtServiceImpl isTokenValid : \n\t - Subject (Username) : {} \n\t - UserDetails Username : {} \n\t - Audience : {} \n\t - Issuer : {}", username, userDetails.getUsername(), extractClaim(token, Claims::getAudience), extractClaim(token, Claims::getIssuer));
+//        log.info("UserDetails Username : " + userDetails.getUsername());
+//        log.info("Subject : " + extractClaim(token, Claims::getAudience));
+//        log.info("Issuer : " + extractClaim(token, Claims::getIssuer));
+        return (username.equals(userDetails.getUsername())) && extractClaim(token, Claims::getAudience).equals(PLATFORM_SERVER_IP_ADDR)
+                && extractClaim(token, Claims::getIssuer).equals(PLATFORM_SERVER_SOCKET_ADDR) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token){return extractExpiration(token).before(new Date());}

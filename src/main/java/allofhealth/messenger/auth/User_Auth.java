@@ -1,46 +1,45 @@
 package allofhealth.messenger.auth;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
-@Entity(name = "user_auth")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Builder
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = "username"))
+@org.springframework.data.relational.core.mapping.Table(name = "user_auth")
 public class User_Auth implements UserDetails {
 
     @Id
-    @Column(name = "username", columnDefinition = "VARCHAR(63)")
+    @Column
     private String username;
 
-    @Column(name = "password")
+    @Column
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    @Column
     private Role role;
 
     @Builder.Default
-    @Column(name = "account_non_expired")
+    @Column
     private boolean accountNonExpired = true;
 
     @Builder.Default
-    @Column(name = "account_non_locked")
+    @Column
     private boolean accountNonLocked = true;
 
     @Builder.Default
-    @Column(name = "credentials_non_expired")
+    @Column
     private boolean credentialsNonLocked = true;
 
     @Builder.Default
-    @Column(name = "enabled")
+    @Column
     private boolean enabled = true;
 
 

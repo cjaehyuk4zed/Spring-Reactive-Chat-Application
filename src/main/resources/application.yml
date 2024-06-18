@@ -14,6 +14,18 @@ spring:
       database: chatdb
   config:
     additional-location : ../../../config/global/
+  r2dbc:
+    url: r2dbc:mysql://192.168.0.79:3306/platform
+    username: platform
+    password: allofhealth!234
+    pool:
+      enabled: true
+  sql:
+    init:
+      platform: mysql
+logging:
+  level:
+    root: TRACE         # Sets the default log level for all loggers
 #  security:
 #    oauth2:
 #      client:

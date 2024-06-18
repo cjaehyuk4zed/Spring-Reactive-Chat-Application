@@ -41,7 +41,9 @@ public class JwtAuthenticationFilter implements WebFilter {
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        log.info("___________________________________________________________________");
         log.info("Begin JWTFilter _____________________________________________");
+        log.info("Requested URL : {}", exchange.getRequest().getURI());
 
         final String accessToken;
         final String userId;
@@ -83,25 +85,31 @@ public class JwtAuthenticationFilter implements WebFilter {
                 .flatMap(userDetails -> {
                     log.info("JWTFilter : flatMap initiated");
                     log.info("JWTFilter : flatMap userDetails : {} | {} | {}", userDetails, userDetails.getUsername(), userDetails.getPassword());
-                    if (jwtService.isTokenValid(accessToken, clientIp, userDetails)) {
 
+                    if (jwtService.isTokenValid(accessToken,  clientIp, userDetails)) {
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userId, null, userDetails.getAuthorities());
                         authToken.setDetails(exchange.getRequest());
                         log.info("JWT authToken : {}", authToken);
-//                // Note that `ReactiveSecurityContextHolder` still uses the `SecurityContext` class
+
                         SecurityContext context = new SecurityContextImpl(authToken);
                         log.info("JWT Filter : Completed userDetailsMono flatMap");
-                        log.info("userDetailsMono : {}", userDetailsMono);
-                        log.info("userDetailsMono contents : {}", userDetailsMono.toString());
+
                         return chain.filter(exchange)
                                 .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
                     } else {
-                        log.info("JWT Filter : else statement initiated");
-                        log.info("else userDetailsMono : {}", userDetailsMono);
+                        log.info("JWT Filter : Token invalid");
                         return loginRedirect(exchange);
                     }
-                }).switchIfEmpty(loginRedirect(exchange));
+                })
+                .doOnError(e -> {
+                    log.error("JWT Filter : doOnError() in userDetailsMono processing: {} | {}", e.getMessage(), e);
+                })
+//                .switchIfEmpty(Mono.defer(() -> {
+//                    log.info("JWT Filter : switchIfEmpty executed - No UserDetails found");
+//                    return loginRedirect(exchange);
+//                }));
+                .switchIfEmpty(loginRedirect(exchange));
     }
 
     private Mono<Void> loginRedirect(ServerWebExchange exchange){
