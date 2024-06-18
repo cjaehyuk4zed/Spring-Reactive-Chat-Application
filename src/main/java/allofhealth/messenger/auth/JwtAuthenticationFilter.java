@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -80,6 +81,7 @@ public class JwtAuthenticationFilter implements WebFilter {
 //                }).switchIfEmpty(loginRedirect(exchange));
 
         Mono<UserDetails> userDetailsMono = this.userDetailsService.findByUsername(userId);
+        log.info("JWTFilter : userDetailsMono : {}", userDetailsMono);
 
         return userDetailsMono
                 .flatMap(userDetails -> {
@@ -102,8 +104,18 @@ public class JwtAuthenticationFilter implements WebFilter {
                         return loginRedirect(exchange);
                     }
                 })
-                .doOnError(e -> {
-                    log.error("JWT Filter : doOnError() in userDetailsMono processing: {} | {}", e.getMessage(), e);
+                .doOnNext(userDetails -> log.info("JWT Filter : Found user : {}", userDetails))
+                .doOnError(error -> {
+                    if (error instanceof ResponseStatusException) {
+                        ResponseStatusException responseStatusException = (ResponseStatusException) error;
+                        if (responseStatusException.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
+                            log.error("User not found for token : {}", error.getMessage());
+                        } else {
+                            log.error("Unexpected error during JWT authentication : {}", error.getMessage());
+                        }
+                    } else {
+                        log.error("Unexpected error during JWT authentication : {}", error.getMessage());
+                    }
                 })
 //                .switchIfEmpty(Mono.defer(() -> {
 //                    log.info("JWT Filter : switchIfEmpty executed - No UserDetails found");

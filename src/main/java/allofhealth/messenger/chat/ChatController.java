@@ -15,7 +15,8 @@ import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestController(value = "/api/v1/chat") // 데이터 리턴 서버
+@RestController // 데이터 리턴 서버
+@RequestMapping("/api/v1/chat")
 public class ChatController {
 
     private final ChatRepository chatRepository;
@@ -28,7 +29,7 @@ public class ChatController {
     // MongoDB will save messages between [sender = A, receiver = B] and [sender = B, receiver = A]
     // but won't be able to query them together for one chatroom, because
     // a query for [sender = A, receiver = B] will not return messages where [sender = B, receiver = A]
-    @CrossOrigin
+//    @CrossOrigin
     @GetMapping(value = "/receiver/{receiver}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Chat> getMsgByReceiver(@PathVariable(name = "receiver") String receiver){
         log.info("ChatController GET /receiver/{receiver}");
@@ -42,7 +43,7 @@ public class ChatController {
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
-    @CrossOrigin
+//    @CrossOrigin
     @PostMapping("/message")
     public Mono<Chat> setMsgByReceiver(@RequestBody Chat.Request chatRequest){
         log.info("ChatController POST /message");

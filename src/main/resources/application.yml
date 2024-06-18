@@ -15,9 +15,13 @@ spring:
   config:
     additional-location : ../../../config/global/
   r2dbc:
-    url: r2dbc:mysql://192.168.0.79:3306/platform
+    url: r2dbc:mysql://192.168.0.2:3306/platform
+    host: 192.168.0.2
+    port: 3306
+    database: platform
     username: platform
     password: allofhealth!234
+    driver: mysql
     pool:
       enabled: true
   sql:
@@ -26,6 +30,13 @@ spring:
 logging:
   level:
     root: TRACE         # Sets the default log level for all loggers
+    org.springframework.web: TRACE
+    org.springframework.security: TRACE
+    javax.management: TRACE
+    io.asyncer: TRACE
+    io.asyncer.r2dbc.mysql.client: OFF
+    io.netty.resolver: TRACE
+    reactor.netty: TRACE
 #  security:
 #    oauth2:
 #      client:

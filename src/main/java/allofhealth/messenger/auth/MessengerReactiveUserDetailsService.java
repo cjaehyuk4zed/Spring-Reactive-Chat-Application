@@ -39,16 +39,24 @@ public class MessengerReactiveUserDetailsService implements ReactiveUserDetailsS
 //                .doOnError(error -> log.error("Error finding user : {} {}", error.getMessage(), error));
 //    }
 
+    /**
+     *
+     * @param username the username to look up
+     * @return
+     *
+     * doOnNext method runs after the mapping is complete (i.e. after `Connection close succeed`).
+     * It is used to trigger side effects such as logging or statistics.
+     */
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-        log.info("UserDetailsService : findByUsername : {}", username);
+        log.info("MessengerReactiveUserDetailsService : findByUsername : {}", username);
         Mono<User_Auth> userMono = userAuthRepository.findById(username);
-        log.info("MessengerReactiveUserDetailsService Mono<User_Auth> : {}", userMono);
+        log.info("MessengerReactiveUserDetailsService : Mono<User_Auth> : {}", userMono);
 
         return userMono.map(userAuth -> (UserDetails) userAuth)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("User not found for username: " + username)))
-                .doOnNext(userDetails -> log.info("Found user : {}", userDetails))
-                .doOnError(error -> log.error("Error finding user : {} {}", error.getMessage(), error));
+                .doOnNext(userDetails -> log.info("MessengerReactiveUserDetailsService : doOnNext Found user : {}", userDetails))
+                .doOnError(error -> log.error("MessengerReactiveUserDetailsService : doOnError Error finding user : {} {}", error.getMessage(), error));
     }
 
 }
