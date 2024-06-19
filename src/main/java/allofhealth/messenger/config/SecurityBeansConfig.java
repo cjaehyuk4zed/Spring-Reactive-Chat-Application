@@ -1,8 +1,6 @@
 package allofhealth.messenger.config;
 
-import allofhealth.messenger.auth.JwtAuthenticationFilter;
 import allofhealth.messenger.auth.MessengerReactiveUserDetailsService;
-import allofhealth.messenger.auth.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,19 +9,12 @@ import org.springframework.security.authentication.UserDetailsRepositoryReactive
 import org.springframework.security.authorization.AuthenticatedReactiveAuthorizationManager;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
-import org.springframework.security.web.server.authorization.AuthorizationWebFilter;
-import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
-import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
-import org.springframework.security.web.server.context.SecurityContextServerWebExchangeWebFilter;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
-import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
-import org.springframework.web.server.ServerWebExchange;
+
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityBeansConfig {
 
-//    private final UserAuthRepository userAuthRepository;
     private final MessengerReactiveUserDetailsService userDetailsService;
 
     /**
@@ -42,10 +33,10 @@ public class SecurityBeansConfig {
     public ReactiveAuthorizationManager<AuthorizationContext> authenticatedAuthorizationManager() {
         return AuthenticatedReactiveAuthorizationManager.authenticated();
     }
-
+//
 //    @Bean
-//    public AuthorizationWebFilter authorizationWebFilter(ReactiveAuthorizationManager<ServerWebExchange> authorizationManager) {
-//        return new AuthorizationWebFilter(authorizationManager);
+//    public HttpClient httpClient(){
+//        HttpClient httpClient = HttpClient.create().followRedirect(true);
+//        return httpClient;
 //    }
-
 }

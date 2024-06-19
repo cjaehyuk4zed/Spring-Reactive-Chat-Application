@@ -49,7 +49,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 
 	// Swagger OpenAPI with SpringDocs
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0'
 
 	// MySQL for auth
 	implementation 'mysql:mysql-connector-java:8.0.32'

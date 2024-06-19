@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,32 +52,20 @@ public class JwtAuthenticationFilter implements WebFilter {
 
 //         Check if JWT token is in "Bearer Authentication" format
         if(authHeader == null || !authHeader.startsWith(BEARER)){
-            log.info("JwtFilter : Authorization header is either null or doesn't contain HTTP Bearer auth");
+            if(exchange.getRequest().getURI().toString().endsWith("/swagger-ui/index.html")
+            || exchange.getRequest().getURI().toString().endsWith("/favicon.ico")
+            || exchange.getRequest().getURI().toString().endsWith("swagger-ui.html")){
+                log.info("JWTFilter : URI is Swagger-UI API");
+                return chain.filter(exchange);
+            }
+            log.info("JWTFilter : Authorization header is either null or doesn't contain HTTP Bearer auth");
             return loginRedirect(exchange);
         }
 
         // Remove "Bearer " header and get the JWT token
         accessToken = authHeader.split(" ")[1].trim();
         userId = jwtService.extractUsername(accessToken);
-        log.info("JwtFilter : JWT token received, userId = " + userId);
-
-//        return this.userDetailsService.findByUsername(userId)
-//                .flatMap(userDetails -> {
-//                    log.info("JWTFilter : flatMap initiated");
-//                    if (jwtService.isTokenValid(accessToken, clientIp, userDetails)) {
-//
-//                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-//                                userId, null, userDetails.getAuthorities());
-//                        authToken.setDetails(exchange.getRequest());
-//                        log.info("JWT authToken : {}", authToken);
-////                // Note that `ReactiveSecurityContextHolder` still uses the `SecurityContext` class
-//                        SecurityContext context = new SecurityContextImpl(authToken);
-//                        return chain.filter(exchange)
-//                                .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
-//                    } else {
-//                        return loginRedirect(exchange);
-//                    }
-//                }).switchIfEmpty(loginRedirect(exchange));
+        log.info("JWTFilter : JWT token received, userId = " + userId);
 
         Mono<UserDetails> userDetailsMono = this.userDetailsService.findByUsername(userId);
         log.info("JWTFilter : userDetailsMono : {}", userDetailsMono);
@@ -92,43 +79,39 @@ public class JwtAuthenticationFilter implements WebFilter {
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userId, null, userDetails.getAuthorities());
                         authToken.setDetails(exchange.getRequest());
-                        log.info("JWT authToken : {}", authToken);
+                        log.info("JWTFilter authToken : {}", authToken);
 
                         SecurityContext context = new SecurityContextImpl(authToken);
-                        log.info("JWT Filter : Completed userDetailsMono flatMap");
-
+                        log.info("JWTFilter : SecurityContext Authentication : {}", context.getAuthentication());
+                        ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context));
                         return chain.filter(exchange)
                                 .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
                     } else {
-                        log.info("JWT Filter : Token invalid");
+                        log.info("JWTFilter : Token invalid");
                         return loginRedirect(exchange);
                     }
                 })
-                .doOnNext(userDetails -> log.info("JWT Filter : Found user : {}", userDetails))
+                .doOnNext(userDetails -> log.info("JWTFilter : Found user : {}", userDetails))
                 .doOnError(error -> {
                     if (error instanceof ResponseStatusException) {
                         ResponseStatusException responseStatusException = (ResponseStatusException) error;
                         if (responseStatusException.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
                             log.error("User not found for token : {}", error.getMessage());
                         } else {
-                            log.error("Unexpected error during JWT authentication : {}", error.getMessage());
+                            log.error("Unexpected HTTP responseCode during JWT authentication : {}", error.getMessage());
                         }
                     } else {
                         log.error("Unexpected error during JWT authentication : {}", error.getMessage());
                     }
-                })
-//                .switchIfEmpty(Mono.defer(() -> {
-//                    log.info("JWT Filter : switchIfEmpty executed - No UserDetails found");
-//                    return loginRedirect(exchange);
-//                }));
-                .switchIfEmpty(loginRedirect(exchange));
+                });
     }
 
     private Mono<Void> loginRedirect(ServerWebExchange exchange){
-        log.info("JWTFilter : loginRedirect loginRedirect");
         String redirectUri = UriComponentsBuilder.fromUriString(LOGIN_REDIRECT_URI)
                 .queryParam("redirect", exchange.getRequest().getURI())
                 .build().toString();
+
+        log.info("JWTFilter : loginRedirect redirectUri : {}", redirectUri);
 
         exchange.getResponse().setStatusCode(HttpStatus.FOUND);
         exchange.getResponse().getHeaders().set(HttpHeaders.LOCATION, redirectUri);

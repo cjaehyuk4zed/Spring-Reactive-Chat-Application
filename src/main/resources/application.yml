@@ -6,6 +6,13 @@ server:
       enabled: true
       force: true
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs  # Path for the OpenAPI documentation
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html  # Path for the Swagger UI
+
 spring:
   data:
     mongodb:
@@ -15,8 +22,8 @@ spring:
   config:
     additional-location : ../../../config/global/
   r2dbc:
-    url: r2dbc:mysql://192.168.0.2:3306/platform
-    host: 192.168.0.2
+    url: r2dbc:mysql://192.168.0.79:3306/platform
+    host: 192.168.0.79
     port: 3306
     database: platform
     username: platform
@@ -29,7 +36,7 @@ spring:
       platform: mysql
 logging:
   level:
-    root: TRACE         # Sets the default log level for all loggers
+#    root: TRACE         # Sets the default log level for all loggers
     org.springframework.web: TRACE
     org.springframework.security: TRACE
     javax.management: TRACE
@@ -37,11 +44,5 @@ logging:
     io.asyncer.r2dbc.mysql.client: OFF
     io.netty.resolver: TRACE
     reactor.netty: TRACE
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          allofhealth_platform:
-#            client-id: 76716d91-5c8d-44a9-93c6-ca7cd3a1d0f4
-#            client-name: messenger
-#            client-secret:
+    org.mongodb.driver: TRACE
+    org.mongodb.driver.protocol.command: OFF
