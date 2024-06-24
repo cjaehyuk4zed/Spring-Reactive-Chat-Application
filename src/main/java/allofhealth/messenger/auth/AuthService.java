@@ -16,51 +16,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
-//
-//    public boolean isPrincipal(){
-//        Authentication auth = getAuthentication();
-//        String principal = auth.getPrincipal().toString();
-//        if(principal == null || principal.equals("anonymousUser")){
-//            return false;
-//        }
-//        return true;
-//    }
-//
-//    public boolean isCurrentUser(String userId){
-//        String principal = getUserPrincipalOrThrow();
-//        log.info("AuthService isCurrentUser : principal : {}", principal);
-//        if(userId.equals(principal)){
-//            return true;
-//        }
-//        return false;
-//    }
-//
-//    public String getUserPrincipalOrThrow() throws AccessDeniedException {
-//        Authentication auth = getAuthentication();
-//        log.info("AuthService auth : {}", auth);
-//        String principal = auth.getPrincipal().toString();
-//        log.info("AuthService principal : {}", principal);
-//        if(principal == null || principal.equals("anonymousUser")){
-//            throw new AccessDeniedException("User login cannot be verified");
-//        }
-//        return principal;
-//    }
-//
-//    private Authentication getAuthentication(){
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        log.info("AuthService SecurityContext : {}", SecurityContextHolder.getContext());
-//        return auth;
-//    }
-//
-//    public boolean isAdmin(){
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        boolean isAdmin = auth.getAuthorities().stream().map(s -> s.toString())
-//                .anyMatch(s -> s.equals("ROLE_" + Role.ADMIN_MAIN) || s.equals("ROLE_" + Role.ADMIN_SUB));
-//        return isAdmin;
-//    }
-
     /**
      * Methods using the ReactiveSecurityContextHolder class
+     * Reactive coding pattern using the Mono class
      * @return
      */
 
@@ -132,8 +90,9 @@ public class AuthService {
         return isAdmin;
     }
 
+    // Solely for the purpose of printing error log if the Mono is empty.
     private Mono<? extends Authentication> authenticationSwitchIfEmptyErrorLog(){
-        log.info("AuthService : switchIfEmptyErrorLog");
+        log.info("AuthService : authenticationSwitchIfEmptyErrorLog");
         return Mono.error(new RuntimeException("AuthService : Mono.switchIfEmpty ERROR"));
     }
 }

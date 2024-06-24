@@ -3,6 +3,10 @@ package allofhealth.messenger.auth;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * List of Permissions to be used by Spring Security, listed as enums
+ * These are not actually used yet. Change as needed.
+ */
 @RequiredArgsConstructor
 public enum Permissions {
     POST_CREATE("post:create"),

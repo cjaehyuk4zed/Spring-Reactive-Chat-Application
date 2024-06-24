@@ -10,6 +10,12 @@ import java.util.stream.Collectors;
 
 import static allofhealth.messenger.auth.Permissions.*;
 
+/**
+ * List of Roles to be used by Spring Security, listed as enums
+ * The "Authorities" are enlisted using the "Permissions.java" enums
+ * These are not actually used yet. Change as needed.
+ * If changed, update changes in the platform app as well
+ */
 @RequiredArgsConstructor
 public enum Role {
 

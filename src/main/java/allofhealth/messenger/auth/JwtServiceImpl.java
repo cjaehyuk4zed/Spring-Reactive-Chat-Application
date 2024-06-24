@@ -19,7 +19,8 @@ import java.util.function.Function;
 import static allofhealth.messenger.constants.DirectoryMapConstants.*;
 
 /**
- * Any edits made here should be reflected in the platform app as well!
+ * Any edits made here should be reflected in the messenger app as well!
+ * JWT 인증 메서드 로직 구현체
  */
 
 

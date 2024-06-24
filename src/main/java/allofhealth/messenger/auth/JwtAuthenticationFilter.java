@@ -20,6 +20,12 @@ import reactor.core.publisher.Mono;
 
 import static allofhealth.messenger.constants.AuthHeaderConstants.*;
 
+/**
+ * JwtAuthenticationFilter
+ * Http Request 를 가로채어, UsernamePasswordAuthenticationToken 을 생성하여 다음 Filter에 전달합니다.
+ * SecurityConfig.java에서 filter 등록이 되어있다.
+ */
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
