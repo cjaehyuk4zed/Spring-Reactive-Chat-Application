@@ -27,7 +27,7 @@ spring:
     port: 3306
     database: platform
     username: platform
-    password: allofhealth!234
+    password: password!234
     driver: mysql
     pool:
       enabled: true
