@@ -12,6 +12,7 @@ Capped Collection을 사용해야, MongoDB의 *Tailable Cursor* 를 통해서
 
 ### 벡엔드 기술 스택
 - Java Spring
+- R2DBC (Reactive Relational Database Connectivity)
 - Spring Reactive
 - Spring WebFlux
 - Spring Security
@@ -28,15 +29,18 @@ Spring Reactive의 *Flux* 데이터 타입을 통해서 연속적인 data stream
 
 ### 테스트
 
-***벡엔드 테스트*** : ChatApplication.java 를 실행하면 백엔드가 실행되며, 아직 연동되어 있지 않으므로
-테스트는 간단한 별도의 프런트엔드 어플로 진행한다.
+***벡엔드 테스트*** : ChatApplication.java 를 실행하면 백엔드가 실행되며, 프런트엔드가 미완성 상태이므로
+Postman을 활용하여 직접 JWT Access Token을 삽입하고 URI에 접속하여 테스트 한다.
 
-***프런트엔드 테스트*** : 테스트용 프런트엔드 "messenger-test"를 vscode에서 열고,
+***프런트엔드 테스트 (미완성)*** : 테스트용 프런트엔드 "messenger-test"를 vscode에서 열고,
 해당 프로젝트에서 'Open with Live Server'옵션으로 프런트엔드를 실행시키면 된다.
 
-***메시지 전송 테스트*** : 테스트용 프런트엔드에서 prompt로 "로그인 아이디" 와 "상대방 아이디"를 물어볼 것이다.
+***메시지 전송 테스트*** : 프런트엔드가 미완성 상태이므로, URI에 로그인 아이디와 상대방 아이디를 직접 삽입하여 전송한다.
+최종 계획으로는, 테스트용 프런트엔드에서 prompt로 "로그인 아이디" 와 "상대방 아이디"를 물어볼 것이다.
 예를 들어, 로그인 아이디 = UserA , 상대방 아이디 = UserB 로 실행한다.
 
-***메시지 수신 테스트*** : 추가로 Live Server를 하나 더 실행시킨다.
+
+***메시지 수신 테스트*** : 프런트엔드가 미완성 상태이므로, URI에 로그인 아이디와 상대방 아이디를 직접 삽입하여 전송한다.
+최종 계획으로는, 추가로 프런트엔드 Live Server를 하나 더 실행시킨다.
 이번엔 로그인 아이디와 상대방 아이디를 바꿔서 설정하면, 전송/수신 테스트가 가능하다.
 예를 들어, 이번엔 로그인 아이디 = UserB , 상대방 아이디 = UserA 로 실행한다.
