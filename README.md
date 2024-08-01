@@ -20,6 +20,8 @@ Capped Collection을 사용해야, MongoDB의 *Tailable Cursor* 를 통해서
 ### 백엔드 구조
 Spring Reactive의 *Flux* 데이터 타입을 통해서 연속적인 data stream을 송신한다.
 이러한 연속적인 data stream을 MongoDB와 송수신 하기 위하여 *@Tailable* 어노테이션을 함께 사용한다.
+Reactive Streams를 활용하는 속에서, 정적 데이터인 MySQL DB와 소통하여
+사용자 로그인/패스워드를 검증하고 JWT 토큰을 받기 위해 JPA 대신 R2DBC 를 활용하게 되었다. 
 
 ### 상수 Config 설정
 해당되는 상수에 변경사항 발생시, 아래 파일들과 platform앱의 상수까지 함께 변경해줘야 한다.
