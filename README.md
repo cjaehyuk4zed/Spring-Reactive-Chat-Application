@@ -1,10 +1,8 @@
 # Chat Application using Spring Reactive and MongoDB
 
-
 ## Messenger Chat : 
-현재 개발 중인 플랫폼에서 사용하게 될 메신저 채팅 어플의 프로토타입이다.
-메인 플랫폼의 로그인 시스템과 아직 연동되어 있지 않은 상태다.
-현재 MongoDB 무료 버전의 용량 한계가 있다고 하여, Apache Kafka로 이전 작업 중이지만 이는 미완성이다.
+SSE (Server Sent Events) 통신 방식을 활용한 메신저 채팅 어플의 프로토타입이다.
+채팅을 하기 위해서는 우선 DB에 로그인을 하여 JWT Access Token을 발급 받아야 한다.
 
 ### 데이터베이스
 MongoDB에 채팅 기록을 저장한다.
