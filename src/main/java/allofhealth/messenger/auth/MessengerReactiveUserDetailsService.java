@@ -20,25 +20,6 @@ public class MessengerReactiveUserDetailsService implements ReactiveUserDetailsS
 
     private final UserAuthRepository userAuthRepository;
 
-//    @Override
-//    public Mono<UserDetails> findByUsername(String username) {
-//        log.info("UserDetailsService : findByUsername : {}", username);
-//        Mono<User_Auth> userMonoUsingWhen = userAuthRepository.findById(username);
-////                .flatMap(userDetails -> {
-////                    log.info("MessengerReactiveUserDetailsService flatMap userDetails : {}", userDetails);
-////                    UserDetails newUser = User_Auth(user);
-////                    return Mono.just(userDetails);
-////                });
-//        log.info("MessengerReactiveUserDetailsService Mono<User_Auth> : {}", userMonoUsingWhen);
-//        Mono<UserDetails> monoUserDetails = userMonoUsingWhen.map(userDetails -> (UserDetails) userDetails);
-//        log.info("MessengerReactiveUserDetailsService Mono<UserDetails> : {}", monoUserDetails);
-//        return Mono.justOrEmpty(monoUserDetails)
-//                .switchIfEmpty(Mono.error(new UsernameNotFoundException("User not found for username: " + username)))
-//                .map(monoUserDetails.)
-//                .doOnNext(userDetails -> log.info("Found user : {}", userDetails))
-//                .doOnError(error -> log.error("Error finding user : {} {}", error.getMessage(), error));
-//    }
-
     /**
      *
      * @param username the username to look up

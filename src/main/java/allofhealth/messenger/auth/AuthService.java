@@ -4,22 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
-
-    public boolean isPrincipal(){
-        Authentication auth = getAuthentication();
-        String principal = auth.getPrincipal().toString();
-        if(principal == null || principal.equals("anonymousUser")){
-            return false;
-        }
-        return true;
-    }
 
     public boolean isCurrentUser(String userId){
         String principal = getUserPrincipalOrThrow();
@@ -31,24 +26,22 @@ public class AuthService {
     }
 
     public String getUserPrincipalOrThrow() throws AccessDeniedException {
-        Authentication auth = getAuthentication();
-        String principal = auth.getPrincipal().toString();
+        log.info("AuthService getUserPrincipalOrThrow");
+        Mono<Authentication> auth = getAuthentication();
+        String principal = auth.toString();
+        log.info("AuthService getUserPrincipalOrThrow : principal : {}", principal);
         if(principal == null || principal.equals("anonymousUser")){
             throw new AccessDeniedException("User login cannot be verified");
         }
         return principal;
     }
 
-    private Authentication getAuthentication(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth;
-    }
-
-    public boolean isAdmin(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAdmin = auth.getAuthorities().stream().map(s -> s.toString())
-                .anyMatch(s -> s.equals("ROLE_" + Role.ADMIN_MAIN) || s.equals("ROLE_" + Role.ADMIN_SUB));
-        return isAdmin;
+    public Mono<Authentication> getAuthentication(){
+        log.info("AuthService getAuthentication");
+        Mono<Authentication> authMono = ReactiveSecurityContextHolder.getContext()
+                .map(securityContext -> securityContext.getAuthentication())
+                .doOnNext(auth -> log.info("AuthService getAuthentication : auth : {}", auth));
+        return authMono;
     }
 
 }

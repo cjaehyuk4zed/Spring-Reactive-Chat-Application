@@ -10,6 +10,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.context.DelegatingSecurityContextRepository;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
@@ -39,7 +41,7 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, ServerHttpSecurity httpSecurity) {
     log.info("SecurityConfig SecurityWebFilterChain : ____________________________________________");
         http.csrf(csrf -> csrf.disable())
                 .cors(corsSpec -> corsSpec.disable());
@@ -56,6 +58,7 @@ public class SecurityConfig {
                 .exceptionHandling(exceptionHandling ->
                          exceptionHandling.authenticationEntryPoint(new RedirectServerAuthenticationEntryPoint(LOGIN_REDIRECT_URI)))
                 .logout(logoutSpec -> logoutSpec.disable());
+
         log.info("SecurityConfig finish SecurityWebFilterChain");
         return http.build();
     }

@@ -4,6 +4,7 @@ import allofhealth.messenger.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -34,35 +35,51 @@ public class ChatController {
     public Flux<Chat> getMsgByReceiver(@PathVariable(name = "receiver") String receiver){
         log.info("ChatController GET /receiver/{receiver}");
 
-        String sender = authService.getUserPrincipalOrThrow();
+//        long roomNum = chatService.getRoomNumBySenderReceiver(sender, receiver);
+//
+//        log.info("ChatController RoomNum : {}", roomNum);
+//        return chatRepository.mFindByRoomNum(roomNum)
+//                .subscribeOn(Schedulers.boundedElastic());
 
-        long roomNum = chatService.getRoomNumBySenderReceiver(sender, receiver);
+        Mono<Authentication> auth = authService.getAuthentication();
 
-        log.info("ChatController RoomNum : {}", roomNum);
-        return chatRepository.mFindByRoomNum(roomNum)
-                .subscribeOn(Schedulers.boundedElastic());
+        return auth.flatMapMany(authentication -> {
+            String sender = authentication.getPrincipal().toString();
+            // Hashing String to "long" variable type, using Java's String.hashCode() method
+            long roomNum = chatService.getRoomNumBySenderReceiver(sender, receiver);
+
+            log.info("ChatController RoomNum : {}", roomNum);
+            return chatRepository.mFindByRoomNum(roomNum)
+                    .subscribeOn(Schedulers.boundedElastic());
+        });
+
+
     }
 
 //    @CrossOrigin
     @PostMapping("/message")
     public Mono<Chat> setMsgByReceiver(@RequestBody Chat.Request chatRequest){
         log.info("ChatController POST /message");
+        Mono<Authentication> auth = authService.getAuthentication();
 
-        String sender = authService.getUserPrincipalOrThrow();
-        // Hashing String to "long" variable type, using Java's String.hashCode() method
-        long roomNum = chatService.getRoomNumBySenderReceiver(sender, chatRequest.getReceiver());
+        return auth.flatMap(authentication -> {
+            String sender = authentication.getPrincipal().toString();
+            // Hashing String to "long" variable type, using Java's String.hashCode() method
+            long roomNum = chatService.getRoomNumBySenderReceiver(sender, chatRequest.getReceiver());
 
-        Chat chat = new Chat.ChatBuilder()
-                .msg(chatRequest.getMsg())
-                .sender(sender)
-                .receiver(chatRequest.getReceiver())
-                .roomNum(roomNum)
-                .createdAt(LocalDateTime.now())
-                .build();
+            Chat chat = new Chat.ChatBuilder()
+                    .msg(chatRequest.getMsg())
+                    .sender(sender)
+                    .receiver(chatRequest.getReceiver())
+                    .roomNum(roomNum)
+                    .createdAt(LocalDateTime.now())
+                    .build();
 
-        log.info("ChatController Chat message : {}", chat);
-        Mono<Chat> savedMessage = chatRepository.save(chat);
-        return savedMessage; // Object를 리턴하면 Spring이 자동으로 JSON 변환 (MessageConverter)
+            log.info("ChatController Chat message : {}", chat);
+            Mono<Chat> savedMessage = chatRepository.save(chat);
+            return savedMessage; // Object를 리턴하면 Spring이 자동으로 JSON 변환 (MessageConverter)
+        });
+
     }
 
     @CrossOrigin

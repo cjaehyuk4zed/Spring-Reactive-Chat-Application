@@ -12,8 +12,8 @@ spring:
       host: localhost
       port: 27017
       database: chatdb
-  config:
-    additional-location : ../../../config/global/
+#  config:
+#    additional-location : ../../../config/global/
   r2dbc:
     url: r2dbc:mysql://192.168.0.2:3306/platform
     host: 192.168.0.2
@@ -27,16 +27,26 @@ spring:
   sql:
     init:
       platform: mysql
+  security:
+    jwt:
+      secret-key: QWxsb2ZIZWFsdGhQbGF0Zm9ybVNlY3JldEtleU1pbmltdW0yNTZCaXQ=
+      expiration: 3600000
+      refresh-token:
+        expiration: 86400000
+  mvc:
+    log-request-details: true
+
 logging:
   level:
-    root: TRACE         # Sets the default log level for all loggers
+#    root: TRACE         # Sets the default log level for all loggers
     org.springframework.web: TRACE
-    org.springframework.security: TRACE
-    javax.management: TRACE
-    io.asyncer: TRACE
-    io.asyncer.r2dbc.mysql.client: OFF
-    io.netty.resolver: TRACE
-    reactor.netty: TRACE
+    org.springframework.security: DEBUG
+#    javax.management: TRACE
+#    io.asyncer: TRACE
+#    io.asyncer.r2dbc.mysql.client: OFF
+#    io.netty.resolver: TRACE
+#    reactor.netty: TRACE
+
 #  security:
 #    oauth2:
 #      client:

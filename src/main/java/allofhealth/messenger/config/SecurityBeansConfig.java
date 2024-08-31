@@ -10,6 +10,7 @@ import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.authorization.AuthenticatedReactiveAuthorizationManager;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.security.web.server.authorization.AuthorizationWebFilter;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
@@ -42,6 +43,7 @@ public class SecurityBeansConfig {
     public ReactiveAuthorizationManager<AuthorizationContext> authenticatedAuthorizationManager() {
         return AuthenticatedReactiveAuthorizationManager.authenticated();
     }
+
 
 //    @Bean
 //    public AuthorizationWebFilter authorizationWebFilter(ReactiveAuthorizationManager<ServerWebExchange> authorizationManager) {

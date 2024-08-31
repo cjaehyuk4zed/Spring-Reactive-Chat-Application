@@ -60,25 +60,7 @@ public class JwtAuthenticationFilter implements WebFilter {
         // Remove "Bearer " header and get the JWT token
         accessToken = authHeader.split(" ")[1].trim();
         userId = jwtService.extractUsername(accessToken);
-        log.info("JwtFilter : JWT token received, userId = " + userId);
-
-//        return this.userDetailsService.findByUsername(userId)
-//                .flatMap(userDetails -> {
-//                    log.info("JWTFilter : flatMap initiated");
-//                    if (jwtService.isTokenValid(accessToken, clientIp, userDetails)) {
-//
-//                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-//                                userId, null, userDetails.getAuthorities());
-//                        authToken.setDetails(exchange.getRequest());
-//                        log.info("JWT authToken : {}", authToken);
-////                // Note that `ReactiveSecurityContextHolder` still uses the `SecurityContext` class
-//                        SecurityContext context = new SecurityContextImpl(authToken);
-//                        return chain.filter(exchange)
-//                                .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
-//                    } else {
-//                        return loginRedirect(exchange);
-//                    }
-//                }).switchIfEmpty(loginRedirect(exchange));
+        log.info("JwtFilter : JWT token received, userId = {}", userId);
 
         Mono<UserDetails> userDetailsMono = this.userDetailsService.findByUsername(userId);
         log.info("JWTFilter : userDetailsMono : {}", userDetailsMono);
@@ -95,6 +77,7 @@ public class JwtAuthenticationFilter implements WebFilter {
                         log.info("JWT authToken : {}", authToken);
 
                         SecurityContext context = new SecurityContextImpl(authToken);
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
                         log.info("JWT Filter : Completed userDetailsMono flatMap");
 
                         return chain.filter(exchange)
@@ -116,12 +99,11 @@ public class JwtAuthenticationFilter implements WebFilter {
                     } else {
                         log.error("Unexpected error during JWT authentication : {}", error.getMessage());
                     }
-                })
+                });
 //                .switchIfEmpty(Mono.defer(() -> {
 //                    log.info("JWT Filter : switchIfEmpty executed - No UserDetails found");
 //                    return loginRedirect(exchange);
 //                }));
-                .switchIfEmpty(loginRedirect(exchange));
     }
 
     private Mono<Void> loginRedirect(ServerWebExchange exchange){
