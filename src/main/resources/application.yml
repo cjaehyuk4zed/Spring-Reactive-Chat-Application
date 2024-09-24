@@ -9,10 +9,20 @@ server:
 spring:
   data:
     mongodb:
-      host: localhost
-      port: 27017
-      database: chatdb
-#  config:
+#      Localhost에서 연결 설정하기
+#      host: localhost
+#      port: 27017
+#      database: chatdb
+      
+#      Naver Cloud for MongoDB 연결 설정하기
+      host : pe44l.pub-vpc.mg.naverncp.com,pe44p.pub-vpc.mg.naverncp.com,pe44v.pub-vpc.mg.naverncp.com
+      port : 17017
+      database : jsluserdb
+      username : JSLUSER
+      password : JSLUSER!2024!
+      replica-set-name : messenger-db001
+
+  #  config:
 #    additional-location : ../../../config/global/
   r2dbc:
     url: r2dbc:mysql://192.168.0.2:3306/platform

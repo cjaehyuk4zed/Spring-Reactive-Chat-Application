@@ -24,15 +24,27 @@ Spring Reactive의 *Flux* 데이터 타입을 통해서 연속적인 data stream
 
 ### 테스트
 
-***벡엔드 테스트*** : ChatApplication.java 를 실행하면 백엔드가 실행되며, 아직 연동되어 있지 않으므로
-테스트는 간단한 별도의 프런트엔드 어플로 진행한다.
+***벡엔드 테스트*** : ChatApplication.java 를 실행하면 백엔드가 실행되며, 
+아직 프런트엔드와 연동되어 있지 않으므로 테스트는 Postman으로 진행한다
 
-***프런트엔드 테스트*** : 테스트용 프런트엔드 "messenger-test"를 vscode에서 열고,
-해당 프로젝트에서 'Open with Live Server'옵션으로 프런트엔드를 실행시키면 된다.
+***메시지 전송 테스트*** : Healthcare Platform에서 로그인하여 JWT토큰을 발급받는다.
+HTTP Bearer Authentication에 토큰 값은 입력 후, 메시지 전송 API를 호출한다 (POST method).
+이후 아래와 같은 형식으로 Postman의 Body에 JSON 형식으로 입력하여 전송한다.
+Sender 정보는 JWT토큰에서 읽어서 전송되며, 객체ID는 MongoDB에서 자동 생성된다 (보안성)
+```json
+{
+    "receiver": "UserB",
+    "message": "Hello, UserB"
+}
+```
 
-***메시지 전송 테스트*** : 테스트용 프런트엔드에서 prompt로 "로그인 아이디" 와 "상대방 아이디"를 물어볼 것이다.
-예를 들어, 로그인 아이디 = UserA , 상대방 아이디 = UserB 로 실행한다.
+***메시지 수신 테스트*** : Healthcare Platform에서 로그인하여 JWT토큰을 발급받는다.
+HTTP Bearer Authentication에 토큰 값은 입력 후, 메시지 수신 API를 호출한다 (GET Method).
+메시지 수신은 SSE(Server-Sent Events)를 통해 연속적인 데이터 스트림을 수신한다.
 
-***메시지 수신 테스트*** : 추가로 Live Server를 하나 더 실행시킨다.
-이번엔 로그인 아이디와 상대방 아이디를 바꿔서 설정하면, 전송/수신 테스트가 가능하다.
-예를 들어, 이번엔 로그인 아이디 = UserB , 상대방 아이디 = UserA 로 실행한다.
+
+## Naver Cloud DB for MongoDB
+네이버 클라우드에서 MongoDB 서버와 저장소를 생성하여 통신할 수 있다.
+resources/application.yml 파일에서 알맞는 연결 설정을 생성하고
+Postman에서 위와 똑같은 과정을 송신/수신 테스트를 진행하면 된다.
+
