@@ -29,8 +29,9 @@ Spring Reactive의 *Flux* 데이터 타입을 통해서 연속적인 data stream
 
 ***메시지 전송 테스트*** : Healthcare Platform에서 로그인하여 JWT토큰을 발급받는다.
 HTTP Bearer Authentication에 토큰 값은 입력 후, 메시지 전송 API를 호출한다 (POST method).
+
 이후 아래와 같은 형식으로 Postman의 Body에 JSON 형식으로 입력하여 전송한다.
-Sender 정보는 JWT토큰에서 읽어서 전송되며, 객체ID는 MongoDB에서 자동 생성된다 (보안성)
+Sender 정보는 JWT토큰에서 읽어서 전송되며, 객체ID는 MongoDB에서 자동 생성된다 (보안성 강화).
 ```json
 {
     "receiver": "UserB",
