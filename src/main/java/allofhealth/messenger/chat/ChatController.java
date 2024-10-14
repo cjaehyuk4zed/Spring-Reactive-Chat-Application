@@ -1,6 +1,8 @@
 package allofhealth.messenger.chat;
 
 import allofhealth.messenger.auth.AuthService;
+import allofhealth.messenger.redis.ConnectedUser;
+import allofhealth.messenger.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -22,6 +24,7 @@ public class ChatController {
 
     private final ChatRepository chatRepository;
     private final ChatService chatService;
+    private final RedisService redisService;
     private final AuthService authService;
 
     // Added a simple hashing (of sorts) to generate a unique roomNum attribute for the chat.
@@ -35,25 +38,23 @@ public class ChatController {
     public Flux<Chat> getMsgByReceiver(@PathVariable(name = "receiver") String receiver){
         log.info("ChatController GET /receiver/{receiver}");
 
-//        long roomNum = chatService.getRoomNumBySenderReceiver(sender, receiver);
-//
-//        log.info("ChatController RoomNum : {}", roomNum);
-//        return chatRepository.mFindByRoomNum(roomNum)
-//                .subscribeOn(Schedulers.boundedElastic());
-
         Mono<Authentication> auth = authService.getAuthentication();
 
         return auth.flatMapMany(authentication -> {
             String sender = authentication.getPrincipal().toString();
             // Hashing String to "long" variable type, using Java's String.hashCode() method
-            long roomNum = chatService.getRoomNumBySenderReceiver(sender, receiver);
+            Long roomNum = chatService.getRoomNumBySenderReceiver(sender, receiver);
 
             log.info("ChatController RoomNum : {}", roomNum);
+            redisService.saveConnectedUser(new ConnectedUser(sender, roomNum));
+
             return chatRepository.mFindByRoomNum(roomNum)
-                    .subscribeOn(Schedulers.boundedElastic());
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .doFinally(signalType -> {
+                        log.info("Chat User Disconnected : SignalType : {}", signalType);
+                        redisService.removeConnectedUser(new ConnectedUser(sender, roomNum));
+                    });
         });
-
-
     }
 
 //    @CrossOrigin
@@ -89,6 +90,11 @@ public class ChatController {
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
+    @GetMapping(value = "/users/{roomNum}")
+    public Mono<Long> getConnectedUserCount(@PathVariable Long roomNum) {
+        Mono<Long> connectedUserCount = redisService.getConnectedUserCount(roomNum);
+        return connectedUserCount.doOnError(throwable -> log.error("Error Connecting to Redis? : {}", throwable.getMessage()));
+    }
 
     /**
      * Old APIs which does not involve login

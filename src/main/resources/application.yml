@@ -10,23 +10,37 @@ spring:
   data:
     mongodb:
 #      Localhost에서 연결 설정하기
-#      host: localhost
-#      port: 27017
-#      database: chatdb
+      host: localhost
+      port: 27017
+      database: chatdb
       
 #      Naver Cloud for MongoDB 연결 설정하기
-      host : pe44l.pub-vpc.mg.naverncp.com,pe44p.pub-vpc.mg.naverncp.com,pe44v.pub-vpc.mg.naverncp.com
-      port : 17017
-      database : jsluserdb
-      username : JSLUSER
-      password : JSLUSER!2024!
-      replica-set-name : messenger-db001
-
+#      (Deprecated username and password)
+#      host : pe44l.pub-vpc.mg.naverncp.com,pe44p.pub-vpc.mg.naverncp.com,pe44v.pub-vpc.mg.naverncp.com
+#      port : 17017
+#      database : jsluserdb
+#      username : JSLUSER
+#      password : JSLUSER!2024!
+#      replica-set-name : messenger-db001
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 10
+          min-idle: 2
+          max-wait: 3000
+        shutdown-timeout: 100
+  #      MongoDB Atlas Cluster 연결 설정하기
   #  config:
 #    additional-location : ../../../config/global/
   r2dbc:
-    url: r2dbc:mysql://192.168.0.2:3306/platform
-    host: 192.168.0.2
+#    url: r2dbc:mysql://192.168.0.2:3306/platform
+#    host: 192.168.0.2
+    url: r2dbc:mysql://localhost:3306/platform
+    host: localhost
     port: 3306
     database: platform
     username: platform
@@ -45,6 +59,8 @@ spring:
         expiration: 86400000
   mvc:
     log-request-details: true
+  main:
+    allow-bean-definition-overriding: true
 
 logging:
   level:
