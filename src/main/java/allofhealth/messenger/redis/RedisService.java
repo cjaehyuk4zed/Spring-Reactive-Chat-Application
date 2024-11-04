@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -25,7 +26,10 @@ public class RedisService {
         String key = "room:" + connectedUser.getRoomNum();
         return redisTemplate.opsForSet()
                 .add(key, connectedUser)
-                .map(result -> result > 0);
+                .map(result -> result > 0)
+                .doFirst(() -> log.info("RedisService saveConnectedUser key : {} | {}", key, connectedUser))
+//                .doOnNext(value -> log.info("RedisService saveConnectedUser result : {} | {}", key, value))
+                .doOnError(error -> log.error("RedisService saveConnectedUser error : {}", error));
     }
 
     // Get all users connected to a specific room
@@ -34,14 +38,30 @@ public class RedisService {
     public Mono<Long> getConnectedUserCount(Long roomNum) {
         log.info("RedisService getConnectedUserCount roomNum : {}", roomNum);
         String key = "room:" + roomNum;
-        return redisTemplate.opsForSet().size(key);
+        return redisTemplate.opsForSet().size(key)
+                .doOnNext(count -> log.info("RedisService getConnectedUserCount count : {}", count))
+                .doOnError(error -> log.error("RedisService getConnectedUserCount error : {}", error));
+
+    }
+
+    public Flux<ConnectedUser> getConnectedUsers(Long roomNum) {
+        log.info("RedisService getConnectedUsers roomNum : {}", roomNum);
+        String key = "room:" + roomNum;
+//        return redisTemplate.opsForSet().members(key)
+//                .doOnNext(connectedUsers -> log.info("RedisService getConnectedUsers connectedUsers : {}", connectedUsers));
+        return redisTemplate
+                .listenToChannel(key)
+                .map(message -> message.getMessage())
+                .doOnNext(connectedUsers -> log.info("RedisService getConnectedUsers connectedUsers : {} | {}", key, connectedUsers));
     }
 
     // Remove a user from a room
     // This method removes a user from the Redis set representing the room they were connected to.
     public Mono<Long> removeConnectedUser(ConnectedUser connectedUser) {
         String key = "room:" + connectedUser.getRoomNum();
-        return redisTemplate.opsForSet().remove(key, connectedUser);
+        return redisTemplate.opsForSet().remove(key, connectedUser)
+                .doOnNext(result -> log.info("RedisService removeConnectedUser result : {}", result))
+                .doOnError(error -> log.error("RedisService removeConnectedUser error : {}", error));
     }
 
     // Check if a user is connected in a room
@@ -50,7 +70,8 @@ public class RedisService {
     public Mono<Boolean> isUserConnected(String userId, Long roomNum) {
         String key = "room:" + roomNum;
         return redisTemplate.opsForSet()
-                .isMember(key, new ConnectedUser(userId, roomNum));
+                .isMember(key, new ConnectedUser(userId, roomNum))
+                .doOnNext(result -> log.info("RedisService isUserConnected result : {}", result));
     }
 
     // Remove all users from a room

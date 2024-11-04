@@ -25,9 +25,9 @@ public class RedisConfig {
 
     @Bean
     ReactiveRedisConnectionFactory redisConnectionFactory(){
-        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(host, port);
-        lettuceConnectionFactory.start();
-        return lettuceConnectionFactory;
+        LettuceConnectionFactory connectionFactory = new LettuceConnectionFactory(host, port);
+        connectionFactory.afterPropertiesSet();
+        return connectionFactory;
     }
 
     /*
@@ -35,8 +35,9 @@ public class RedisConfig {
     * Note that using ReactiveRedisTemplate offers more functionality (like JPA does)
     * compared to RedisReactiveCommands
      */
+
     @Bean
-    ReactiveRedisTemplate<String, ConnectedUser> redisOperations(){
+    ReactiveRedisTemplate<String, ConnectedUser> redisOperations(ReactiveRedisConnectionFactory connectionFactory){
         Jackson2JsonRedisSerializer<ConnectedUser> serializer = new Jackson2JsonRedisSerializer<>(ConnectedUser.class);
 
         // Jackson JSON serializers for objects to ensure "ConnectedUser" can be serialized/deserialized properly
@@ -45,7 +46,7 @@ public class RedisConfig {
 
         RedisSerializationContext<String, ConnectedUser> context = builder.value(serializer).build();
 
-        return new ReactiveRedisTemplate<>(new LettuceConnectionFactory(), context);
+        return new ReactiveRedisTemplate<>(connectionFactory, context);
     }
 
 }

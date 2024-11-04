@@ -10,18 +10,18 @@ spring:
   data:
     mongodb:
 #      Localhost에서 연결 설정하기
-      host: localhost
+#      host: localhost
+#      port: 27017
+#      database: chatdb
+      
+#      MongoDB Atlas Cloud DB 연결 설정은 CollectionConfig에도 정의되어 있다
+      host : chatdb.f9mra.mongodb.net
       port: 27017
       database: chatdb
-      
-#      Naver Cloud for MongoDB 연결 설정하기
-#      (Deprecated username and password)
-#      host : pe44l.pub-vpc.mg.naverncp.com,pe44p.pub-vpc.mg.naverncp.com,pe44v.pub-vpc.mg.naverncp.com
-#      port : 17017
-#      database : jsluserdb
-#      username : JSLUSER
-#      password : JSLUSER!2024!
-#      replica-set-name : messenger-db001
+      username: cjaehyuk4zed
+      password: ${MONGODB_ATLAS_PASSWORD}
+      authentication-database: admin
+      options: ?retryWrites=true&w=majority&appName=ChatD
     redis:
       host: localhost
       port: 6379
@@ -33,8 +33,6 @@ spring:
           min-idle: 2
           max-wait: 3000
         shutdown-timeout: 100
-  #      MongoDB Atlas Cluster 연결 설정하기
-  #  config:
 #    additional-location : ../../../config/global/
   r2dbc:
 #    url: r2dbc:mysql://192.168.0.2:3306/platform

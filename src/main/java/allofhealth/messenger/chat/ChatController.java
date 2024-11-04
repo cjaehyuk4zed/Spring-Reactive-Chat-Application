@@ -46,13 +46,15 @@ public class ChatController {
             Long roomNum = chatService.getRoomNumBySenderReceiver(sender, receiver);
 
             log.info("ChatController RoomNum : {}", roomNum);
-            redisService.saveConnectedUser(new ConnectedUser(sender, roomNum));
+            redisService.saveConnectedUser(new ConnectedUser(sender, roomNum))
+                    .subscribe();
 
             return chatRepository.mFindByRoomNum(roomNum)
                     .subscribeOn(Schedulers.boundedElastic())
                     .doFinally(signalType -> {
                         log.info("Chat User Disconnected : SignalType : {}", signalType);
-                        redisService.removeConnectedUser(new ConnectedUser(sender, roomNum));
+                        redisService.removeConnectedUser(new ConnectedUser(sender, roomNum))
+                                .subscribe();
                     });
         });
     }
@@ -67,6 +69,7 @@ public class ChatController {
             String sender = authentication.getPrincipal().toString();
             // Hashing String to "long" variable type, using Java's String.hashCode() method
             long roomNum = chatService.getRoomNumBySenderReceiver(sender, chatRequest.getReceiver());
+            redisService.saveConnectedUser(new ConnectedUser(sender, roomNum));
 
             Chat chat = new Chat.ChatBuilder()
                     .msg(chatRequest.getMsg())
@@ -90,10 +93,19 @@ public class ChatController {
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
-    @GetMapping(value = "/users/{roomNum}")
+    @GetMapping(value = "/users/{roomNum}/count")
     public Mono<Long> getConnectedUserCount(@PathVariable Long roomNum) {
         Mono<Long> connectedUserCount = redisService.getConnectedUserCount(roomNum);
-        return connectedUserCount.doOnError(throwable -> log.error("Error Connecting to Redis? : {}", throwable.getMessage()));
+        return connectedUserCount
+                .doOnError(throwable -> log.error("Error Connecting to Redis? : {}", throwable.getMessage()));
+    }
+
+    @GetMapping(value = "/users/{roomNum}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ConnectedUser> getConnectedUsers(@PathVariable Long roomNum) {
+        Flux<ConnectedUser> connectedUsers = redisService.getConnectedUsers(roomNum);
+        return connectedUsers
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnError(throwable -> log.error("Error Connecting to Redis? : {}", throwable.getMessage()));
     }
 
     /**

@@ -24,7 +24,6 @@ import org.springframework.web.server.ServerWebExchange;
 @RequiredArgsConstructor
 public class SecurityBeansConfig {
 
-//    private final UserAuthRepository userAuthRepository;
     private final MessengerReactiveUserDetailsService userDetailsService;
 
     /**
